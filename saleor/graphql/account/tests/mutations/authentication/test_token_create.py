@@ -618,3 +618,21 @@ def test_create_token_enabled_mode_for_staff(
     payload = jwt_decode(data["token"])
     assert payload["is_staff"] is True
     assert payload["email"] == staff_user.email
+
+
+@patch("saleor.account.throttling.cache")
+def test_with_whitespace_around_email(_mocked_cache, api_client, customer_user):
+    # given
+    variables = {
+        "email": f"  {customer_user.email} ",
+        "password": customer_user._password,
+    }
+
+    # when
+    response = api_client.post_graphql(MUTATION_CREATE_TOKEN, variables)
+
+    # then
+    data = get_graphql_content(response)["data"]["tokenCreate"]
+    assert data["errors"] == []
+    assert data["user"]["email"] == customer_user.email
+    assert data["token"]

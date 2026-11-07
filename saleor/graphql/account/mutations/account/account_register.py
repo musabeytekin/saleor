@@ -147,7 +147,7 @@ class AccountRegister(DeprecatedModelMutation):
                 data.get("channel"), error_class=AccountErrorCode, allow_replica=False
             ).slug
 
-        data["email"] = data["email"].lower()
+        data["email"] = data["email"].strip().lower()
 
         password = data["password"]
         try:
