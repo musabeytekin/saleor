@@ -45,7 +45,7 @@ def authenticate_with_throttling(request, email, password) -> models.User | None
     ip_user_attempts_count = 0
     user_exists = True
 
-    user = retrieve_user_by_email(email)
+    user = retrieve_user_by_email(email.strip())
     if not user:
         user_exists = False
         user = models.User()

@@ -609,3 +609,27 @@ def test_register_assigns_default_customer_type(
     assert not content["data"]["accountRegister"]["errors"]
     new_user = User.objects.get(email=email)
     assert new_user.customer_type == default_customer_type
+
+
+def test_trims_whitespace_around_email(api_client, channel_PLN, site_settings):
+    # given
+    email = "anna@example.com"
+    site_settings.enable_account_confirmation_by_email = False
+    site_settings.save(update_fields=["enable_account_confirmation_by_email"])
+    variables = {
+        "input": {
+            "email": f"  {email} ",
+            "password": "Password",
+            "channel": channel_PLN.slug,
+        }
+    }
+
+    # when
+    response = api_client.post_graphql(ACCOUNT_REGISTER_MUTATION, variables)
+
+    # then
+    content = get_graphql_content(response)
+    data = content["data"]["accountRegister"]
+    assert data["errors"] == []
+    assert data["user"]["email"] == email
+    assert User.objects.get(email=email)
